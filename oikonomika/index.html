@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="el">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ισοζύγιο — πόσα έχεις, πόσα χρωστάς</title>
+    <meta
+      name="description"
+      content="Πίνακας λογαριασμών και χρεών: πόσα έχεις, πόσα χρωστάς, καθαρή θέση."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <header class="top">
+      <p class="brand">Ισοζύγιο</p>
+      <div class="top-actions">
+        <button type="button" class="ghost" id="exportBtn" title="Εξαγωγή αντιγράφου">
+          Εξαγωγή
+        </button>
+        <label class="ghost file-label" title="Εισαγωγή αντιγράφου">
+          Εισαγωγή
+          <input type="file" id="importInput" accept="application/json,.json" hidden />
+        </label>
+        <button type="button" class="primary" id="addBtn">Προσθήκη</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="hero-title">
+        <h1 id="hero-title">Πόσα έχεις και πόσα χρωστάς</h1>
+        <p class="lede">
+          Ένας πίνακας για λογαριασμούς και χρέη — με καθαρή θέση σε ευρώ.
+        </p>
+
+        <div class="totals" role="group" aria-label="Σύνολα">
+          <div class="total total-have">
+            <span class="total-label">Έχω</span>
+            <span class="total-value" id="totalHave">0,00 €</span>
+          </div>
+          <div class="total total-owe">
+            <span class="total-label">Χρωστάω</span>
+            <span class="total-value" id="totalOwe">0,00 €</span>
+          </div>
+          <div class="total total-net">
+            <span class="total-label">Καθαρή θέση</span>
+            <span class="total-value" id="totalNet">0,00 €</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="ledger" aria-labelledby="ledger-title">
+        <div class="ledger-head">
+          <h2 id="ledger-title">Λογαριασμοί &amp; χρέη</h2>
+          <p class="hint" id="storageHint">Αποθηκεύεται τοπικά σε αυτόν τον browser.</p>
+        </div>
+
+        <div class="filters" role="tablist" aria-label="Φίλτρο">
+          <button type="button" class="filter is-active" data-filter="all" role="tab" aria-selected="true">
+            Όλα
+          </button>
+          <button type="button" class="filter" data-filter="asset" role="tab" aria-selected="false">
+            Έχω
+          </button>
+          <button type="button" class="filter" data-filter="liability" role="tab" aria-selected="false">
+            Χρωστάω
+          </button>
+        </div>
+
+        <ul class="account-list" id="accountList"></ul>
+        <p class="empty" id="emptyState" hidden>
+          Δεν έχεις ακόμα εγγραφές. Πάτα <strong>Προσθήκη</strong> για τον πρώτο λογαριασμό ή χρέος.
+        </p>
+      </section>
+    </main>
+
+    <dialog class="sheet" id="accountDialog" aria-labelledby="dialogTitle">
+      <form method="dialog" id="accountForm">
+        <header class="sheet-head">
+          <h2 id="dialogTitle">Νέα εγγραφή</h2>
+          <button type="button" class="icon-close" id="closeDialog" aria-label="Κλείσιμο">
+            ×
+          </button>
+        </header>
+
+        <input type="hidden" id="accountId" />
+
+        <label class="field">
+          <span>Όνομα</span>
+          <input
+            type="text"
+            id="accountName"
+            name="name"
+            required
+            maxlength="80"
+            placeholder="π.χ. Τράπεζα, Πιστωτική, Δάνειο"
+            autocomplete="off"
+          />
+        </label>
+
+        <fieldset class="kind">
+          <legend>Τύπος</legend>
+          <label class="kind-option">
+            <input type="radio" name="kind" value="asset" checked />
+            <span>Έχω (λογαριασμός / περιουσία)</span>
+          </label>
+          <label class="kind-option">
+            <input type="radio" name="kind" value="liability" />
+            <span>Χρωστάω (χρέος / υποχρέωση)</span>
+          </label>
+        </fieldset>
+
+        <label class="field">
+          <span>Ποσό (€)</span>
+          <input
+            type="number"
+            id="accountAmount"
+            name="amount"
+            required
+            min="0"
+            step="0.01"
+            inputmode="decimal"
+            placeholder="0,00"
+          />
+        </label>
+
+        <label class="field">
+          <span>Σημείωση <em>(προαιρετικό)</em></span>
+          <input
+            type="text"
+            id="accountNote"
+            name="note"
+            maxlength="120"
+            placeholder="π.χ. κοινός λογαριασμός"
+            autocomplete="off"
+          />
+        </label>
+
+        <footer class="sheet-actions">
+          <button type="button" class="danger ghost" id="deleteBtn" hidden>Διαγραφή</button>
+          <div class="sheet-actions-right">
+            <button type="button" class="ghost" id="cancelBtn">Άκυρο</button>
+            <button type="submit" class="primary" id="saveBtn">Αποθήκευση</button>
+          </div>
+        </footer>
+      </form>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>
