@@ -92,7 +92,7 @@ export function QuickEntryForm({ companies }: { companies: CompanyOption[] }) {
 
       <label>
         Κατηγορία
-        <select name="category" required defaultValue={categories[0]}>
+        <select key={kind} name="category" required defaultValue={categories[0]}>
           {categories.map((c) => (
             <option key={c} value={c}>
               {c}
